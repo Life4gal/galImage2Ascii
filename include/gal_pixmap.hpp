@@ -10,11 +10,25 @@ namespace gal::image2ascii {
 		using size_type = util::matrix<Color>::size_type;
 
 		explicit Pixmap(size_type w = {}, size_type h = {}) noexcept : width(w),
-																	   height(h),
-																	   pixels(w) {
+																	   height(h) {
+			resize(w, h);
+		}
+
+		void resize(size_type w, size_type h) {
+			pixels.resize(w);
 			for (auto& r: pixels) {
 				r.resize(h);
 			}
+		}
+
+		// this should be no leak for nested resource
+		void clear() noexcept {
+			pixels.clear();
+		}
+
+		void clear_and_reset(size_type w, size_type h) {
+			clear();
+			resize(w, h);
 		}
 
 		[[nodiscard]] Color& sample(size_type pos_x, size_type pos_y) noexcept {

@@ -5,55 +5,34 @@
 
 namespace gal::image2ascii {
 	struct Color {
-		float red;
-		float green;
-		float blue;
-		std::optional<float> alpha;
+		using value_type = float;
+
+		value_type red;
+		value_type green;
+		value_type blue;
+
+		// because optional is a template type
+		// so those functions with alpha participation (and the functions called in them must be visible in the header file)
+		std::optional<value_type> alpha;
 
 		explicit Color(
-				float r = 0.0f, float g = 0.0f, float b = 0.0f,
-				decltype(alpha) a = std::nullopt) noexcept
-			: red(r),
-			  green(g),
-			  blue(b),
-			  alpha(a) {}
+				value_type r = {}, value_type g = {}, value_type b = {},
+				decltype(alpha) a = {}) noexcept;
 
-		Color& operator+=(const Color& rhs) noexcept {
-			red += rhs.red;
-			green += rhs.green;
-			blue += rhs.blue;
+		Color& operator+=(const Color& rhs) noexcept;
 
-			return *this;
-		}
+		[[nodiscard]] Color operator+(const Color& rhs) const noexcept;
 
-		[[nodiscard]] Color operator+(const Color& rhs) const noexcept {
-			auto c = *this;
-			c.operator+=(std::forward<const Color&>(rhs));
+		Color& operator-=(const Color& rhs) noexcept;
 
-			return c;
-		}
-
-		Color& operator-=(const Color& rhs) noexcept {
-			red -= rhs.red;
-			green -= rhs.green;
-			blue -= rhs.blue;
-
-			return *this;
-		}
-
-		[[nodiscard]] Color operator-(const Color& rhs) const noexcept {
-			auto c = *this;
-			c.operator-=(std::forward<const Color&>(rhs));
-
-			return c;
-		}
+		[[nodiscard]] Color operator-(const Color& rhs) const noexcept;
 
 		[[nodiscard]] bool operator==(const Color& rhs) const noexcept {
 			return red == rhs.red && green == rhs.green && blue == rhs.blue;
 		}
 
 		[[nodiscard]] bool same(const Color& rhs) const noexcept {
-			return this->operator==(std::forward<const Color&>(rhs)) && alpha == rhs.alpha;
+			return alpha == rhs.alpha && this->operator==(std::forward<const Color&>(rhs));
 		}
 
 		void opacity_to(decltype(alpha) new_alpha) noexcept {
@@ -67,18 +46,9 @@ namespace gal::image2ascii {
 			return c;
 		}
 
-		void level_to(decltype(red) amount) noexcept {
-			red *= amount;
-			green *= amount;
-			blue *= amount;
-		}
+		void level_to(value_type amount) noexcept;
 
-		[[nodiscard]] Color level(decltype(red) amount) const noexcept {
-			auto c = *this;
-			c.level_to(amount);
-
-			return c;
-		}
+		[[nodiscard]] Color level(value_type amount) const noexcept;
 	};
 }// namespace gal::image2ascii
 
