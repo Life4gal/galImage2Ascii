@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12...3.17)
 
 project(
-		StarterTemplateTest
+		galImage2AsciiExec
 		LANGUAGES CXX
 )
 
@@ -19,7 +19,7 @@ set(CXXOPTS_BUILD_EXAMPLES off)
 set(CXXOPTS_BUILD_TESTS off)
 
 CPMAddPackage(
-		NAME StarterTemplate
+		NAME galImage2Ascii
 		SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/..
 )
 
@@ -40,18 +40,13 @@ add_executable(
 set_target_properties(
 		${PROJECT_NAME}
 		PROPERTIES CXX_STANDARD 17
-		OUTPUT_NAME "StarterTemplateTest"
+		OUTPUT_NAME "galImage2AsciiExec"
 )
 
 target_link_libraries(
 		${PROJECT_NAME}
 		PRIVATE
-		StarterTemplate::StarterTemplate
+		galImage2Ascii::galImage2Ascii
 		gtest_main
 		cxxopts
-)
-
-add_test(
-		NAME ${PROJECT_NAME}_test
-		COMMAND ${PROJECT_NAME}
 )
