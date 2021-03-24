@@ -25,6 +25,9 @@ namespace gal::image2ascii::util {
 	template<typename T>
 	using buffer = std::vector<T>;
 
+	template<typename T>
+	using matrix = buffer<buffer<T>>;
+
 }// namespace gal::image2ascii::util
 
 #endif//GAL_IMAGE2ASCII_BUFFER_HPP

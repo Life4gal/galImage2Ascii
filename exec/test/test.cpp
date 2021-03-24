@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <gal_color.hpp>
+#include <gal_pixmap.hpp>
 
 namespace
 {
@@ -84,5 +85,18 @@ namespace
 		ASSERT_FALSE(c1.same(c2));
 		c1.opacity_to(1.0f);
 		ASSERT_TRUE(c1.same(c2));
+	}
+
+	TEST(TestPixmap, pixmap)
+	{
+		using namespace gal::image2ascii;
+		Pixmap p{10, 20};
+		Color c{};
+
+		ASSERT_EQ(p.get_width(), 10);
+		ASSERT_EQ(p.get_height(), 20);
+
+		ASSERT_EQ(p.sample(0, 0), c);
+		ASSERT_EQ(p.sample(999, 999), c);
 	}
 }

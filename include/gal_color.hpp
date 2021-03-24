@@ -18,8 +18,7 @@ namespace gal::image2ascii {
 			  blue(b),
 			  alpha(a) {}
 
-		Color& operator+=(const Color& rhs) noexcept
-		{
+		Color& operator+=(const Color& rhs) noexcept {
 			red += rhs.red;
 			green += rhs.green;
 			blue += rhs.blue;
@@ -27,16 +26,14 @@ namespace gal::image2ascii {
 			return *this;
 		}
 
-		[[nodiscard]] Color operator+(const Color& rhs) noexcept
-		{
+		[[nodiscard]] Color operator+(const Color& rhs) const noexcept {
 			auto c = *this;
 			c.operator+=(std::forward<const Color&>(rhs));
 
 			return c;
 		}
 
-		Color& operator-=(const Color& rhs) noexcept
-		{
+		Color& operator-=(const Color& rhs) noexcept {
 			red -= rhs.red;
 			green -= rhs.green;
 			blue -= rhs.blue;
@@ -44,46 +41,39 @@ namespace gal::image2ascii {
 			return *this;
 		}
 
-		[[nodiscard]] Color operator-(const Color& rhs) noexcept
-		{
+		[[nodiscard]] Color operator-(const Color& rhs) const noexcept {
 			auto c = *this;
 			c.operator-=(std::forward<const Color&>(rhs));
 
 			return c;
 		}
 
-		[[nodiscard]] bool operator==(const Color& rhs) const noexcept
-		{
+		[[nodiscard]] bool operator==(const Color& rhs) const noexcept {
 			return red == rhs.red && green == rhs.green && blue == rhs.blue;
 		}
 
-		[[nodiscard]] bool same(const Color& rhs) const noexcept
-		{
+		[[nodiscard]] bool same(const Color& rhs) const noexcept {
 			return this->operator==(std::forward<const Color&>(rhs)) && alpha == rhs.alpha;
 		}
 
-		void opacity_to(decltype(alpha) new_alpha) noexcept
-		{
+		void opacity_to(decltype(alpha) new_alpha) noexcept {
 			alpha = new_alpha;
 		}
 
-		[[nodiscard]] Color opacity(decltype(alpha) new_alpha) noexcept
-		{
+		[[nodiscard]] Color opacity(decltype(alpha) new_alpha) const noexcept {
 			auto c = *this;
 			c.opacity_to(new_alpha);
 
 			return c;
 		}
 
-		void level_to(decltype(red) amount) noexcept
-		{
+		void level_to(decltype(red) amount) noexcept {
 			red *= amount;
 			green *= amount;
 			blue *= amount;
 		}
 
-		[[nodiscard]] Color level(decltype(red) amount) noexcept
-		{
+		[[nodiscard]] Color level(decltype(red) amount) const noexcept {
 			auto c = *this;
 			c.level_to(amount);
 
