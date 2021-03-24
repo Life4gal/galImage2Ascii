@@ -1,17 +1,8 @@
 #include <gtest/gtest.h>
-
-#include <something.hpp>
+#include <gal_color.hpp>
 
 namespace
 {
-	TEST(TestHello, say_hello)
-	{
-		auto what = something::greeter::say();
-		ASSERT_STREQ(what.c_str(), "Hello World!");
-
-		something::greeter::hello();
-	}
-
 	template<size_t... N>
 	static constexpr auto square_nums(size_t index, std::index_sequence<N...>) {
 		constexpr auto nums = std::array{N * N...};
@@ -70,5 +61,28 @@ namespace
 				std::tuple<int, int, int, int>>::value);
 
 		std::cout << tuple << '\n';
+	}
+
+	TEST(TestColor, color)
+	{
+		using namespace gal::image2ascii;
+		Color c1{1.0f, 2.0f, 3.0f};
+		Color c2{c1};
+
+		ASSERT_EQ(c1.alpha, std::nullopt);
+		ASSERT_EQ(c2.alpha, std::nullopt);
+		ASSERT_EQ(c1, c2);
+
+		c2.opacity_to(1.0f);
+		ASSERT_EQ(c2.alpha, 1.0f);
+		ASSERT_EQ(c1, c2);
+
+		auto c3 = c2.opacity(0.5f);
+		ASSERT_EQ(c3.alpha, 0.5f);
+		ASSERT_EQ(c3, c2);
+
+		ASSERT_FALSE(c1.same(c2));
+		c1.opacity_to(1.0f);
+		ASSERT_TRUE(c1.same(c2));
 	}
 }
