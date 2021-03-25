@@ -452,7 +452,7 @@ iii;;:,:i,.tt%i..  ....,.;$,.,...,;;.:. ;i. %XX%%X$$;::...:;t..,.,,:,;;:;ii
 :;;;;:;;:,..t%%; . .,..,:;:.:,,,,,:i;iiiii:,XiX$@$$$t%ii,:;iX, .,,:,:,;;i;;
 ,:::;;;;:,,.i%X;:,.:.,.:;;::,,,,:::t:%,;i;;::::X$X;t%Xi;;iiiX:, ,.,;;;ii:i;
 ```
-specify threshold and invert: 
+specify threshold and invert: ./galImage2AsciiExec -p 9.jpg -w 75 -h 82 -i -t 0.3
 ```text
                         :%%%%t                                             
                         %%XX%%tii                                          
