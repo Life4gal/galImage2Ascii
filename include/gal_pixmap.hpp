@@ -1,6 +1,7 @@
 #ifndef GAL_IMAGE2ASCII_PIXMAP_HPP
 #define GAL_IMAGE2ASCII_PIXMAP_HPP
 
+#include <algorithm>
 #include <gal_buffer.hpp>
 #include <gal_color.hpp>
 
@@ -19,6 +20,8 @@ namespace gal::image2ascii {
 			for (auto& r: pixels) {
 				r.resize(h);
 			}
+			width = w;
+			height = h;
 		}
 
 		// this should be no leak for nested resource

@@ -5,6 +5,18 @@ project(
 		LANGUAGES CXX
 )
 
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:TheLartians/PackageProject.cmake#master")
+
+CPMAddPackage(
+		GITHUB_REPOSITORY jarro2783/cxxopts
+		GIT_TAG master
+		OPTIONS
+		"CXXOPTS_BUILD_EXAMPLES OFF"
+		"CXXOPTS_BUILD_TESTS OFF"
+		"CXXOPTS_ENABLE_INSTALL ON"
+)
+
 file(GLOB_RECURSE galImage2AsciiHeader CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE galImage2AsciiSource CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
@@ -14,7 +26,16 @@ add_library(
 		${galImage2AsciiSource}
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX CXX_STANDARD 17)
+set_target_properties(
+		${PROJECT_NAME} PROPERTIES
+		LINKER_LANGUAGE CXX
+		CXX_STANDARD 17
+)
+
+# being a cross-platform target, we enforce standards conformance on MSVC
+target_compile_options(${PROJECT_NAME} PUBLIC "$<$<BOOL:${MSVC}>:/permissive->")
+
+target_link_libraries(${PROJECT_NAME} cxxopts)
 
 target_include_directories(
 		${PROJECT_NAME}
@@ -23,22 +44,7 @@ target_include_directories(
 		$<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
-# being a cross-platform target, we enforce standards conformance on MSVC
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<BOOL:${MSVC}>:/permissive->")
-
 string(TOLOWER ${PROJECT_NAME}/version.h VERSION_HEADER_LOCATION)
-
-# for CPMAddPackage below
-include(cmake/CPM.cmake)
-
-# for packageProject below
-#CPMAddPackage(
-#		NAME PackageProject.cmake
-#		GITHUB_REPOSITORY TheLartians/PackageProject.cmake
-#		VERSION 1.6.0
-#)
-#CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.6.0")
-CPMAddPackage("gh:TheLartians/PackageProject.cmake#master")
 
 packageProject(
 		NAME ${PROJECT_NAME}
@@ -48,5 +54,5 @@ packageProject(
 		INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include
 		INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
 		VERSION_HEADER "${VERSION_HEADER_LOCATION}"
-		DEPENDENCIES "StarterTemplate"
+		DEPENDENCIES "galImage2Ascii"
 )

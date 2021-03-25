@@ -17,15 +17,41 @@ namespace gal::image2ascii {
 
 		explicit Color(
 				value_type r = {}, value_type g = {}, value_type b = {},
-				decltype(alpha) a = {}) noexcept;
+				decltype(alpha) a = {}) noexcept
+			: red(r),
+			  green(g),
+			  blue(b),
+			  alpha(a) {}
 
-		Color& operator+=(const Color& rhs) noexcept;
+		Color& operator+=(const Color& rhs) noexcept {
+			red += rhs.red;
+			green += rhs.green;
+			blue += rhs.blue;
 
-		[[nodiscard]] Color operator+(const Color& rhs) const noexcept;
+			return *this;
+		}
 
-		Color& operator-=(const Color& rhs) noexcept;
+		[[nodiscard]] Color operator+(const Color& rhs) const noexcept {
+			auto c = *this;
+			c.operator+=(std::forward<const Color&>(rhs));
 
-		[[nodiscard]] Color operator-(const Color& rhs) const noexcept;
+			return c;
+		}
+
+		Color& operator-=(const Color& rhs) noexcept {
+			red -= rhs.red;
+			green -= rhs.green;
+			blue -= rhs.blue;
+
+			return *this;
+		}
+
+		[[nodiscard]] Color operator-(const Color& rhs) const noexcept {
+			auto c = *this;
+			c.operator-=(std::forward<const Color&>(rhs));
+
+			return c;
+		}
 
 		[[nodiscard]] bool operator==(const Color& rhs) const noexcept {
 			return red == rhs.red && green == rhs.green && blue == rhs.blue;
@@ -46,9 +72,18 @@ namespace gal::image2ascii {
 			return c;
 		}
 
-		void level_to(value_type amount) noexcept;
+		void level_to(value_type amount) noexcept {
+			red *= amount;
+			green *= amount;
+			blue *= amount;
+		}
 
-		[[nodiscard]] Color level(value_type amount) const noexcept;
+		[[nodiscard]] Color level(value_type amount) const noexcept {
+			auto c = *this;
+			c.level_to(amount);
+
+			return c;
+		}
 	};
 }// namespace gal::image2ascii
 

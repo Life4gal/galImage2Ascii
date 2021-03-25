@@ -1,31 +1,66 @@
-#include <gtest/gtest.h>
+#include <gal_image.hpp>
+#include <gal_sample.hpp>
 
-#include <cxxopts.hpp>
+#include "gal_args_parser.hpp"
 
-int main(int argc, char** argv) {
-	cxxopts::Options options("galStarterTemplateTest", "A test for galStarterTemplate.");
+using namespace gal::image2ascii;
 
-	options.add_options("CLI args")("b,bar", "Param bar", cxxopts::value<std::string>()->default_value("bar"))("d,debug", "Run google-test", cxxopts::value<bool>()->default_value("false"))("f,foo", "Param foo", cxxopts::value<int>()->default_value("10"))("h,help", "Print usage");
+constexpr char ascii_glyphs[] = {
+		' ', '.', ',', ':', ';', 'i', 't', '%', 'X', '$', '@', '#'};
+constexpr auto ascii_glyphs_size = std::size(ascii_glyphs) - 1;
 
-	auto result = options.parse(argc, argv);
+int main(int argc, const char* const* argv) {
+	exec::Parser parser{};
+	exec::Image image{};
 
-	if (result.count("help")) {
-		std::cout << options.help() << std::endl;
-		return 0;
+	if (parser.setup(argc, argv, &image) != exec::Parser::parse_state::SUCCESS) {
+		return -1;
 	}
 
-	auto debug = result["debug"].as<bool>();
+	Pixmap pixmap;
+	auto result = util::load_image(image.filepath.c_str(), pixmap);
 
-	if (debug) {
-		testing::InitGoogleTest(&argc, argv);
-		return RUN_ALL_TESTS();
+	switch (result) {
+		case gal::image2ascii::util::image_load_state::NULL_FILENAME:
+			std::cout << "Invalid filepath: " << image.filepath << std::endl;
+			parser.print_help();
+			return -1;
+		case gal::image2ascii::util::image_load_state::LOAD_FILE_FAILED:
+			std::cout << "Can not load the file: " << image.filepath << std::endl;
+			parser.print_help();
+			return -1;
+		case gal::image2ascii::util::image_load_state::INCOMPATIBLE_FORMAT:
+			std::cout << "Incompatible image format: " << image.filepath << std::endl;
+			parser.print_help();
+			return -1;
+		default:
+			break;
 	}
 
-	auto bar = result["bar"].as<std::string>();
-	auto foo = result["foo"].as<int>();
+	for (auto y = 0; y < image.height; ++y) {
+		std::string str;
+		str.reserve(image.width + 1);
+		for (auto x = 0; x < image.width; ++x) {
+			auto u = static_cast<float>(x) / image.width;
+			auto v = static_cast<float>(y) / image.height;
 
-	std::cout << "Curr:"
-			  << " [bar]->" << bar << " [foo]->" << foo << std::endl;
+			auto color = util::bilinear_sample(pixmap, u, v);
+			auto luminance = util::luminance(color);
+
+			if (image.invert) {
+				luminance = 1.0 - luminance;
+			}
+
+			if (luminance < image.threshold) {
+				luminance = 0;
+			}
+
+			auto c = ascii_glyphs + static_cast<int>(ascii_glyphs_size * luminance);
+			str.push_back(*c);
+		}
+		str.push_back('\n');
+		std::cout << str;
+	}
 
 	return 0;
 }
