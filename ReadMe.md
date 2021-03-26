@@ -4,11 +4,11 @@
 
 | Switch             | Description                                    |
 |:------------------ |:---------------------------------------------- |
-| -u or -usage       | Print usage                                    |
-| -w or -width       | use [-w value] or [-width value] to specify output width (>0)            |
-| -h or -height      | use [-h value] or [-height value] to specify output height (>0)          |
-| -t or -threshold   | use [-t value] or [-threshold value] to specify the threshold (0~1)      |
-| -i or -invert      | add [-i] or [-invert] to set invert                                      |
+| -u or --usage       | Print usage                                    |
+| -w or --width       | use [-w value] or [--width value] to specify output width (>0)            |
+| -h or --height      | use [-h value] or [--height value] to specify output height (>0)          |
+| -t or --threshold   | use [-t value] or [--threshold value] to specify the threshold (0~1)      |
+| -i or --invert      | add [-i] or [--invert] to set invert                                      |
 
 ## Samples
 
