@@ -1,7 +1,6 @@
 #include <gal_image.hpp>
 #include <gal_sample.hpp>
-
-#include "gal_args_parser.hpp"
+#include <gal_args_parser.hpp>
 
 using namespace gal::image2ascii;
 
@@ -35,6 +34,31 @@ int main(int argc, const char* const* argv) {
 			return -1;
 		default:
 			break;
+	}
+
+	if(!image.output_path.empty())
+	{
+		auto save = util::save_as_png(image.output_path.c_str(), pixmap);
+
+		switch (save) {
+			case gal::image2ascii::util::image_save_state::NULL_FILENAME:
+				std::cout << "Invalid filepath: " << image.output_path << std::endl;
+				parser.print_help();
+				return -1;
+			case gal::image2ascii::util::image_save_state::NO_SPACE_TO_WRITE:
+				std::cout << "Zero size image: " << image.filepath << std::endl;
+				parser.print_help();
+				return -1;
+			case gal::image2ascii::util::image_save_state::NOT_ENOUGH_MEMORY:
+				std::cout << "Not enough memory: " << image.filepath << " to " << image.output_path << std::endl;
+				parser.print_help();
+				return -1;
+			case gal::image2ascii::util::image_save_state::WRITE_FAILED:
+				std::cout << "Can not write image: " << image.filepath << " to " << image.output_path << std::endl;
+				return -1;
+			default:
+				return 0;
+		}
 	}
 
 	for (auto y = 0; y < image.height; ++y) {

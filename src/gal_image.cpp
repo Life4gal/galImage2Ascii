@@ -1,9 +1,31 @@
 #include <gal_image.hpp>
+#include <memory>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image.hpp>
 #include <stb_image_write.hpp>
+
+struct image_load_deleter
+{
+	auto operator()(void* p)
+	{
+		return stbi_image_free(p);
+	}
+};
+struct image_output_deleter
+{
+	auto operator()(void* p)
+	{
+		return free(p);
+	}
+};
+
+// todo: if use dumb ptr, we got segmentation fault(and memory leak...) because we got a nullptr after save_as (but we have a heap address in save_as) like
+// unsigned char* data = nullptr;
+// auto result = save_as(filename, std::forward<const Pixmap&>(input), data);
+using image_load_ptr = std::unique_ptr<unsigned char, image_load_deleter>;
+using image_output_ptr = std::unique_ptr<unsigned char, image_output_deleter>;
 
 namespace {
 	using namespace gal::image2ascii;
@@ -11,28 +33,31 @@ namespace {
 
 	// do not forget free output data!!!
 	// just for png,bmp,tga
-	image_save_state save_as(const char* filename, const Pixmap& input, unsigned char* output) {
+//	image_save_state save_as(const char* filename, const Pixmap& input, unsigned char* output) {
+	image_save_state save_as(const char* filename, const Pixmap& input, image_output_ptr& output) {
 		if (filename == nullptr) return image_save_state::NULL_FILENAME;
 
 		auto width = input.get_width();
 		auto height = input.get_height();
 		if (width == 0 || height == 0) return image_save_state::NO_SPACE_TO_WRITE;
 
-		output = static_cast<unsigned char*>(malloc(width * height * 4));
+//		output = static_cast<unsigned char*>(malloc(width * height * 4));
+		output.reset(static_cast<unsigned char*>(malloc(width * height * 4)));
 		if (output == nullptr) return image_save_state::NOT_ENOUGH_MEMORY;
 
+		auto data = output.get();
 		for (auto x = 0; x < width; ++x) {
 			for (auto y = 0; y < height; ++y) {
 				auto curr = 4 * (y * width + x);
 
 				auto [red, green, blue, alpha] = input.sample(x, y);
 
-				output[curr] = static_cast<unsigned char>(red >= 1 ? 255 : red * 255);
-				output[curr + 1] = static_cast<unsigned char>(green >= 1 ? 255 : green * 255);
-				output[curr + 2] = static_cast<unsigned char>(blue >= 1 ? 255 : blue * 255);
+				data[curr] = static_cast<unsigned char>(red >= 1 ? 255 : red * 255);
+				data[curr + 1] = static_cast<unsigned char>(green >= 1 ? 255 : green * 255);
+				data[curr + 2] = static_cast<unsigned char>(blue >= 1 ? 255 : blue * 255);
 
 				auto a = alpha.value_or(1);
-				output[curr + 3] = static_cast<unsigned char>(a >= 1 ? 255 : a * 255);
+				data[curr + 3] = static_cast<unsigned char>(a >= 1 ? 255 : a * 255);
 			}
 		}
 
@@ -47,15 +72,16 @@ namespace gal::image2ascii::util {
 		int width;
 		int height;
 		int bpp;
-		auto data = stbi_load(filename, &width, &height, &bpp, 0);
+		image_load_ptr input{stbi_load(filename, &width, &height, &bpp, 0)};
 
-		if (data == nullptr) return image_load_state::LOAD_FILE_FAILED;
+		if (input == nullptr) return image_load_state::LOAD_FILE_FAILED;
 
 		//		output.clear_and_reset(width, height);
 		// clear should be no necessary if overwrite every pixel
 		output.resize(width, height);
 
 		auto result = image_load_state::SUCCESS;
+		auto data = input.get();
 
 		using color_value_type = Color::value_type;
 		if (bpp == 3) {
@@ -78,52 +104,44 @@ namespace gal::image2ascii::util {
 			result = image_load_state::INCOMPATIBLE_FORMAT;
 		}
 
-		stbi_image_free(data);
-
 		return result;
 	}
 
 	image_save_state save_as_png(const char* filename, const Pixmap& input) {
-		unsigned char* data = nullptr;
+		image_output_ptr data;
 		auto result = save_as(filename, std::forward<const Pixmap&>(input), data);
 
 		if (result != image_save_state::SUCCESS) {
-			free(data);
 			return result;
 		}
 
-		auto write = stbi_write_png(filename, input.get_width(), input.get_height(), 4, data, static_cast<int>(input.get_width()) * 4);
-		free(data);
+		auto write = stbi_write_png(filename, input.get_width(), input.get_height(), 4, data.get(), static_cast<int>(input.get_width()) * 4);
 
 		return write == 1 ? image_save_state::SUCCESS : image_save_state::WRITE_FAILED;
 	}
 
 	image_save_state save_as_bmp(const char* filename, const Pixmap& input) {
-		unsigned char* data = nullptr;
+		image_output_ptr data = nullptr;
 		auto result = save_as(filename, std::forward<const Pixmap&>(input), data);
 
 		if (result != image_save_state::SUCCESS) {
-			free(data);
 			return result;
 		}
 
-		auto write = stbi_write_bmp(filename, input.get_width(), input.get_height(), 4, data);
-		free(data);
+		auto write = stbi_write_bmp(filename, input.get_width(), input.get_height(), 4, data.get());
 
 		return write == 1 ? image_save_state::SUCCESS : image_save_state::WRITE_FAILED;
 	}
 
 	image_save_state save_as_tga(const char* filename, const Pixmap& input) {
-		unsigned char* data = nullptr;
+		image_output_ptr data = nullptr;
 		auto result = save_as(filename, std::forward<const Pixmap&>(input), data);
 
 		if (result != image_save_state::SUCCESS) {
-			free(data);
 			return result;
 		}
 
-		auto write = stbi_write_tga(filename, input.get_width(), input.get_height(), 4, data);
-		free(data);
+		auto write = stbi_write_tga(filename, input.get_width(), input.get_height(), 4, data.get());
 
 		return write == 1 ? image_save_state::SUCCESS : image_save_state::WRITE_FAILED;
 	}

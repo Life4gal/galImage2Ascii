@@ -2,7 +2,6 @@
 #define GAL_IMAGE2ASCII_EXEC_ARGS_PARSER_HPP
 
 #include <cxxopts.hpp>
-#include <iostream>
 
 namespace gal::image2ascii::exec {
 	struct Image {
@@ -13,6 +12,7 @@ namespace gal::image2ascii::exec {
 		float threshold;
 		bool invert;
 		std::string filepath;
+		std::string output_path;
 	};
 
 	class Parser {

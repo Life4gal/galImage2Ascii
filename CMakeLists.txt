@@ -1,20 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12...3.17)
 project(
 		galImage2Ascii
-		VERSION 0.0.1
+		VERSION 0.2.1
 		LANGUAGES CXX
-)
-
-include(cmake/CPM.cmake)
-CPMAddPackage("gh:TheLartians/PackageProject.cmake#master")
-
-CPMAddPackage(
-		GITHUB_REPOSITORY jarro2783/cxxopts
-		GIT_TAG master
-		OPTIONS
-		"CXXOPTS_BUILD_EXAMPLES OFF"
-		"CXXOPTS_BUILD_TESTS OFF"
-		"CXXOPTS_ENABLE_INSTALL ON"
 )
 
 file(GLOB_RECURSE galImage2AsciiHeader CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
@@ -35,8 +23,6 @@ set_target_properties(
 # being a cross-platform target, we enforce standards conformance on MSVC
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<BOOL:${MSVC}>:/permissive->")
 
-target_link_libraries(${PROJECT_NAME} cxxopts)
-
 target_include_directories(
 		${PROJECT_NAME}
 		PUBLIC
@@ -45,6 +31,9 @@ target_include_directories(
 )
 
 string(TOLOWER ${PROJECT_NAME}/version.h VERSION_HEADER_LOCATION)
+
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:TheLartians/PackageProject.cmake#master")
 
 packageProject(
 		NAME ${PROJECT_NAME}
