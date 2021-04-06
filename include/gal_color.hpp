@@ -4,6 +4,7 @@
 #include <optional>
 
 namespace gal::image2ascii {
+	// color of each pixel
 	struct Color {
 		using value_type = float;
 

@@ -27,6 +27,7 @@ namespace gal::image2ascii {
 		// this should be no leak for nested resource
 		void clear() noexcept {
 			pixels.clear();
+			pixels.shrink_to_fit();
 		}
 
 		void clear_and_reset(size_type w, size_type h) {
@@ -71,7 +72,7 @@ namespace gal::image2ascii {
 		 *
 		 * get color in [x, y] --> pixel[x][y]
 		 */
-		mutable util::matrix<Color> pixels;
+		util::matrix<Color> pixels;
 	};
 }// namespace gal::image2ascii
 
